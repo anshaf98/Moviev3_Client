@@ -1,39 +1,77 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { BsMarkdown } from "react-icons/bs";
 import { Message, Select } from "../UsedInputs";
 import Title from "./../Title";
 import Star from "./../Star";
-import { Movies } from "../../data/MovieData";
+// import { Movies } from "../../data/MovieData";
+import Empty from "../Empty";
+import { useDispatch, useSelector } from "react-redux";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { ReviewValidation } from "../Validation/MovieValidation";
+import { toast } from "react-hot-toast";
+import { InlineError } from "../Notifications/Error";
+import { Link } from "react-router-dom";
+import { reviewMovieAction } from "../../Redux/Actions/moviesActions";
+
+const Ratings = [
+  {
+    title: "0 - Poor",
+    value: 0,
+  },
+  {
+    title: "1 - Fair",
+    value: 1,
+  },
+  {
+    title: "2 - Good",
+    value: 2,
+  },
+  {
+    title: "3 - Very Good",
+    value: 3,
+  },
+  {
+    title: "4 - Excellent",
+    value: 4,
+  },
+  {
+    title: "5 - Masterpiece",
+    value: 5,
+  },
+];
 
 const MovieRates = ({ movie }) => {
-  const Ratings = [
-    {
-      title: "0 - Poor",
-      value: 0,
-    },
-    {
-      title: "1 - Fair",
-      value: 1,
-    },
-    {
-      title: "2 - Good",
-      value: 2,
-    },
-    {
-      title: "3 - Very Good",
-      value: 3,
-    },
-    {
-      title: "4 - Excellent",
-      value: 4,
-    },
-    {
-      title: "5 - Masterpiece",
-      value: 5,
-    },
-  ];
+  // const [rating, setRating] = useState();
 
-  const [rating, setRating] = useState();
+  const dispatch = useDispatch();
+  const { isLoading, isError } = useSelector((state) => state.createReview);
+  const { userInfo } = useSelector((state) => state.userLogin);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(ReviewValidation) });
+
+  // ! on submit
+  const onSubmit = (data) => {
+    dispatch(
+      reviewMovieAction({
+        id: movie?._id,
+        review: data,
+      })
+    );
+    // console.log(data);
+  };
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(isError);
+      dispatch({ type: "CREATE_REVIEW_RESET" });
+    }
+  }, [dispatch, isError]);
 
   return (
     <div className=" my-12">
@@ -41,7 +79,10 @@ const MovieRates = ({ movie }) => {
 
       <div className=" mt-10 xl:grid flex-colo grid-cols-5 gap-12 bg-dry xs:p-10 py-10 px-2 sm:p-20 rounded">
         {/* write */}
-        <div className=" xl:col-span-2 w-full flex flex-col gap-8">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className=" xl:col-span-2 w-full flex flex-col gap-8"
+        >
           <h3 className=" text-xl text-text font-semibold">
             Review "{movie?.name}"
           </h3>
@@ -54,54 +95,86 @@ const MovieRates = ({ movie }) => {
             <Select
               label="Select Rating"
               options={Ratings}
-              onChange={(e) => setRating(e.target.value)}
+              name="rating"
+              register={{ ...register("rating") }}
             />
             <div className=" flex mt-4 text-lg gap-2 text-star">
-              <Star value={rating} />
+              <Star value={watch("rating", false)} />
             </div>
+            {errors.rating && <InlineError text={errors.rating.message} />}
           </div>
 
           {/* message */}
-          <Message label="Message" placeholder="Write your review here" />
+          <div className=" w-full">
+            <Message
+              label="Message"
+              placeholder="Write your review here"
+              name="comment"
+              register={{ ...register("comment") }}
+            />
+            {errors.comment && <InlineError text={errors.comment.message} />}
+          </div>
 
           {/* submit */}
-          <button className=" bg-subMain text-white py-3 w-full flex-colo rounded">
-            Submit
-          </button>
-        </div>
+          {userInfo ? (
+            <button
+              disabled={isLoading}
+              type="submit"
+              className=" bg-subMain text-white py-3 w-full flex-colo rounded"
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className=" bg-main border border-border text-subMain py-4 w-full flex-colo rounded"
+            >
+              Login to review this movie
+            </Link>
+          )}
+        </form>
 
         {/* reviews */}
         <div className="col-span-3 w-full flex flex-col gap-6">
-          <h3 className=" text-xl text-text font-semibold">Reviews (56)</h3>
+          <h3 className=" text-xl text-text font-semibold">
+            Reviews ({movie?.numberOfReviews})
+          </h3>
           <div className=" w-full flex flex-col bg-main gap-6 rounded-lg md:p-12 p-6 h-header overflow-y-scroll">
-            {Movies.map((user, i) => (
-              <div className=" md:grid flex flex-col w-full grid-cols-12 gap-6 bg-dry p-4 border border-gray-800 rounded-lg">
-                <div className=" col-span-2 bg-main hidden md:block">
-                  <img
-                    src={
-                      user
-                        ? user.image
-                        : "https://res.cloudinary.com/dpakxje91/image/upload/v1664289863/profile-photo_ojxfym.png"
-                    }
-                    alt=""
-                    className="  h-24 object-cover rounded"
-                  />
-                </div>
+            {movie?.reviews?.length > 0 ? (
+              movie?.reviews?.map((review) => (
+                <div
+                  key={review?._id}
+                  className=" md:grid flex flex-col w-full grid-cols-12 gap-6 bg-dry p-4 border border-gray-800 rounded-lg"
+                >
+                  <div className=" col-span-2 bg-main hidden md:block">
+                    <img
+                      src={
+                        review?.userImage
+                          ? review?.userImage
+                          : "https://res.cloudinary.com/dpakxje91/image/upload/v1664289863/profile-photo_ojxfym.png"
+                      }
+                      alt={review?.userName}
+                      className="  h-24 object-cover rounded"
+                    />
+                  </div>
 
-                <div className=" col-span-7 flex flex-col gap-2">
-                  <h2>{user?.name}</h2>
-                  <p className=" text-xs leading-6 font-medium text-text">
-                    {user?.desc}
-                  </p>
-                </div>
+                  <div className=" col-span-7 flex flex-col gap-2">
+                    <h2 className=" capitalize">{review?.userName}</h2>
+                    <p className=" capitalize text-xs leading-6 font-medium text-text">
+                      {review?.comment}
+                    </p>
+                  </div>
 
-                {/* rates */}
+                  {/* rates */}
 
-                <div className=" col-span-3 flex-rows border-l border-border text-xs gap-1 text-star">
-                  <Star value={user?.rate} />
+                  <div className=" col-span-3 flex-rows border-l border-border text-xs gap-1 text-star">
+                    <Star value={review?.rating} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <Empty message={`Be first to rate "${movie?.name}"`} />
+            )}
           </div>
         </div>
       </div>

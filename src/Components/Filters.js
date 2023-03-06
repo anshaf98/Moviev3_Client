@@ -1,45 +1,44 @@
-import React, { useState, Fragment } from "react";
-import { CategoriesData } from "../data/CategoriesData";
+import React, { Fragment } from "react";
+// import { CategoriesData } from "../data/CategoriesData";
 import { Listbox, Transition } from "@headlessui/react";
 import { CgSelect } from "react-icons/cg";
 import { AiOutlineCheck } from "react-icons/ai";
+import {
+  LanguageData,
+  RatesData,
+  TimesData,
+  YearData,
+} from "../data/FilterData";
+// import { getAllMoviesAction } from "../Redux/Actions/moviesActions";
 
-const YearData = [
-  { title: "Sort By Year" },
-  { title: "1700 - 1800" },
-  { title: "1800 - 1900" },
-  { title: "1900 - 2000" },
-  { title: "2000 - 2010" },
-  { title: "2010 - 2020" },
-  { title: "2020 - 2030" },
-];
-const TimesData = [
-  { title: "Sort By Hours" },
-  { title: "1 - 5 Hours" },
-  { title: "5 - 10 Hours" },
-  { title: "10 - 15 Hours" },
-  { title: "15 - 20 Hours" },
-];
-const RatesData = [
-  { title: "Sort By Rates" },
-  { title: "1 Star" },
-  { title: "2 Star" },
-  { title: "3 Star" },
-  { title: "4 Star" },
-  { title: "5 Star" },
-];
-
-const Filters = () => {
-  const [category, setCategory] = useState({ title: "Category" });
-  const [year, setYear] = useState(YearData[0]);
-  const [times, setTimes] = useState(TimesData[0]);
-  const [rates, setRates] = useState(RatesData[0]);
+const Filters = (props) => {
+  const {
+    categories,
+    category,
+    setCategory,
+    language,
+    setLanguage,
+    year,
+    setYear,
+    times,
+    setTimes,
+    rates,
+    setRates,
+  } = props?.data;
 
   const Filter = [
     {
       value: category,
       onChange: setCategory,
-      items: CategoriesData,
+      items:
+        categories?.length > 0
+          ? [{ title: "All Categories" }, ...categories]
+          : [{ title: "No category found" }],
+    },
+    {
+      value: language,
+      onChange: setLanguage,
+      items: LanguageData,
     },
     {
       value: year,
@@ -57,8 +56,25 @@ const Filters = () => {
       items: RatesData,
     },
   ];
+
+  // useEffect(() => {
+  //   if (category?.title !== "No category found") {
+  //     dispatch(
+  //       getAllMoviesAction({
+  //         category: category?.title === "All Categories" ? "" : category?.title,
+  //         times: times?.title.replace(/\D/g, ""),
+  //         language:
+  //           language?.title === "Sort By Language" ? "" : language?.title,
+  //         rate: rates?.title.replace(/\D/g, ""),
+  //         year: year?.title.replace(/\D/g, ""),
+  //         search: "",
+  //       })
+  //     );
+  //   }
+  // }, [category, language, year, times, rates, dispatch]);
+
   return (
-    <div className=" my-6 bg-dry border text-dryGray border-gray-800 grid md:grid-cols-4 grid-cols-2 lg:gap-12 gap-2 rounded p-6">
+    <div className=" my-6 bg-dry border text-dryGray border-gray-800 grid md:grid-cols-5 grid-cols-2 lg:gap-12 gap-2 rounded p-6">
       {Filter.map((item, index) => (
         <Listbox key={index} value={item.value} onChange={item.onChange}>
           <div className=" relative">

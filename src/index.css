@@ -18,7 +18,15 @@ select:focus {
 /* basic color */
 .linear-bg {
     background: linear-gradient(269.82deg, #07091c00 0.17%, #080a1ad6 99.87%)
+        /* background: #0c111B; */
 }
+
+/* mainColor: "#0c111B",
+sliderColor: "#030B17",
+sidebarColor: "#192133",
+formColor: "#182030",
+searchContainerColor: "#0D121C",
+searchItemColor: "#192133", */
 
 .hoveres {
     @apply hidden

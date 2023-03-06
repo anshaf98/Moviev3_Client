@@ -1,12 +1,28 @@
-import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
 import { CgUser } from "react-icons/cg";
 import { FaHeart } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
-  const hover = "hover:text-subMain transitions text-white";
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  const { userInfo } = useSelector((state) => state.userLogin);
 
+  const { likedMovies } = useSelector((state) => state.userGetFavoriteMovies);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/movies/${search}`);
+      setSearch(search);
+    } else {
+      navigate(`/movies`);
+    }
+  };
+
+  const hover = "hover:text-subMain transitions text-white";
   const Hover = ({ isActive }) => (isActive ? "text-subMain" : hover);
 
   return (
@@ -28,7 +44,7 @@ const Navbar = () => {
           {/* searchbar */}
           <div className=" col-span-3">
             <form
-              action=""
+              onSubmit={handleSearch}
               className=" w-full text-sm bg-dryGray rounded flex-btn gap-4"
             >
               <button
@@ -39,8 +55,10 @@ const Navbar = () => {
               </button>
 
               <input
-                type="text"
-                placeholder=" Search Movie Name from here"
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search Movie Name from here"
                 className=" w-11/12 h-12 font-medium placeholder:text-border text-sm bg-transparent border-none px-2 text-black"
               />
             </form>
@@ -48,9 +66,6 @@ const Navbar = () => {
 
           {/* menu */}
           <div className=" col-span-3 font-medium text-sm hidden xl:gap-14 2xl:gap-20 justify-between lg:flex xl:justify-end items-center">
-            {/* <NavLink to="/" className={Hover}>
-              Home
-            </NavLink> */}
             <NavLink to="/movies" className={Hover}>
               Movies
             </NavLink>
@@ -60,13 +75,36 @@ const Navbar = () => {
             <NavLink to="/contact-us" className={Hover}>
               Contact Us
             </NavLink>
-            <NavLink to="/login" className={Hover}>
-              <CgUser className=" w-8 h-8" />
+            {/*  */}
+            <NavLink
+              to={
+                userInfo?.isAdmin
+                  ? "/dashboard"
+                  : userInfo
+                  ? "/profile"
+                  : "/login"
+              }
+              className={Hover}
+            >
+              {userInfo ? (
+                <img
+                  src={
+                    userInfo?.image
+                      ? userInfo?.image
+                      : "https://www.computerhope.com/jargon/g/guest-user.png"
+                  }
+                  alt=""
+                  className=" w-8 h-8 rounded-full border object-cover border-subMain"
+                />
+              ) : (
+                <CgUser className=" w-8 h-8" />
+              )}
             </NavLink>
+            {/*  */}
             <NavLink to="/favorites" className={`${Hover} relative`}>
               <FaHeart className=" w-6 h-6" />
               <div className="w-5 h-5 flex-colo rounded-full text-xs bg-subMain absolute -top-5 -right-1">
-                1
+                {likedMovies?.length}
               </div>
             </NavLink>
           </div>

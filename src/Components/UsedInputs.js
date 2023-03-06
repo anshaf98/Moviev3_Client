@@ -1,4 +1,4 @@
-export const Message = ({ label, placeholder }) => {
+export const Message = ({ label, placeholder, register, name }) => {
   return (
     <div className=" text-sm w-full">
       <label className=" text-border font-semibold">{label}</label>
@@ -6,12 +6,14 @@ export const Message = ({ label, placeholder }) => {
       <textarea
         className=" w-full h-40 mt-2 p-6 bg-main border border-border rounded"
         placeholder={placeholder}
+        {...register}
+        name={name}
       ></textarea>
     </div>
   );
 };
 
-export const Select = ({ label, options, onChange }) => {
+export const Select = ({ label, options, register, name }) => {
   return (
     <>
       <label htmlFor="" className=" text-border font-semibold">
@@ -19,7 +21,8 @@ export const Select = ({ label, options, onChange }) => {
       </label>
       <select
         className=" w-full mt-2 px-6 py-4 text-text bg-main border border-border rounded"
-        onChange={onChange}
+        {...register}
+        name={name}
       >
         {options.map((o, i) => (
           <option key={i} value={o.value}>
@@ -31,14 +34,27 @@ export const Select = ({ label, options, onChange }) => {
   );
 };
 
-export const Input = ({ label, placeholder, type, bg }) => {
+export const Input = ({
+  label,
+  placeholder,
+  type,
+  bg,
+  register,
+  name,
+  value,
+  onChange,
+}) => {
   return (
     <div className=" text-sm w-full">
       <label htmlFor="" className=" text-border font-semibold">
         {label}
       </label>
       <input
+        name={name}
+        value={value}
+        onChange={onChange}
         type={type}
+        {...register}
         placeholder={placeholder}
         className={`w-full text-sm mt-2 p-4 border border-border rounded text-white ${
           bg ? "bg-main" : "bg-dry"

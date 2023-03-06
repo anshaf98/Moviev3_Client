@@ -1,7 +1,7 @@
 import Drawer from "rc-drawer";
 import React from "react";
 
-const MainDrawer = ({ children, drawerOpen, closeDrawer }) => {
+function MainDrawer({ children, drawerOpen, closeDrawer }) {
   return (
     <Drawer
       open={drawerOpen}
@@ -13,6 +13,6 @@ const MainDrawer = ({ children, drawerOpen, closeDrawer }) => {
       {children}
     </Drawer>
   );
-};
+}
 
 export default MainDrawer;

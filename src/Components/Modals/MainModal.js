@@ -4,6 +4,7 @@ import { AiOutlineClose } from "react-icons/ai";
 
 const MainModal = ({ modalOpen, setModalOpen, children }) => {
   const cancelButtonRef = useRef();
+
   return (
     <>
       <Transition show={modalOpen} as={Fragment} appear>
